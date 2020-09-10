@@ -1,11 +1,14 @@
 package com.bianeck.minhasfinancas.service.impl;
 
+import com.bianeck.minhasfinancas.exception.ErroAutenticacao;
 import com.bianeck.minhasfinancas.exception.RegraNegocioException;
 import com.bianeck.minhasfinancas.model.entity.Usuario;
 import com.bianeck.minhasfinancas.model.repository.UsuarioRepository;
 import com.bianeck.minhasfinancas.service.UsuarioService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -19,7 +22,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario autenticar(String email, String senha) {
-        return null;
+        Optional<Usuario> usuario = repository.findByEmail(email);
+        if(!usuario.isPresent())
+            throw new ErroAutenticacao("Usuário não encontrado para o e-mail informado.");
+
+        if (!usuario.get().getSenha().equals(senha))
+            throw new ErroAutenticacao("Senha inválida.");
+
+        return usuario.get();
+
     }
 
     @Override
