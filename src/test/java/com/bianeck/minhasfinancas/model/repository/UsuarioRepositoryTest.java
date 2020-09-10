@@ -12,6 +12,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @DataJpaTest
@@ -28,7 +30,7 @@ public class UsuarioRepositoryTest {
     @DisplayName("Deve verificar a existência de um e-mail")
     public void deveVerificarAExistenciaDeUmEmail() {
         // cenario
-        Usuario usuario = Usuario.builder().nome("usuario").email("usuario@email.com").build();
+        Usuario usuario = criarUsuario();
         entityManager.persist(usuario);
         // ação / execução
         boolean result = repository.existsByEmail("usuario@email.com");
@@ -47,5 +49,52 @@ public class UsuarioRepositoryTest {
 
         // verificacao
         Assertions.assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deve persistir um usuário na base de dados")
+    public void devePersistirUmUsuarioNaBaseDeDados() {
+        // cenario
+        Usuario usuario = criarUsuario();
+        // acao - execucao
+        Usuario usuarioSalvo = repository.save(usuario);
+
+        // verificacao
+        Assertions.assertThat(usuarioSalvo.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Deve buscar um usuário por e-mail")
+    public void deveBuscarUmUsuarioPorEmail() {
+        // cenario
+        Usuario usuario = criarUsuario();
+
+        // acao - execucao
+        entityManager.persist(usuario);
+
+        // verificacao
+        Optional<Usuario> result = repository.findByEmail("usuario@email.com");
+
+        Assertions.assertThat(result.isPresent()).isTrue();
+
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio ao buscar um usuário por e-mail quando não existe na base")
+    public void deveRetornarVazioAoBuscarUsuarioPorEmailQuandoNaoExisteNaBase() {
+
+        // verificacao
+        Optional<Usuario> result = repository.findByEmail("usuario@email.com");
+
+        Assertions.assertThat(result.isPresent()).isFalse();
+
+    }
+
+    public static Usuario criarUsuario() {
+        return Usuario.builder()
+                        .nome("usuario")
+                        .email("usuario@email.com")
+                        .senha("senha")
+                        .build();
     }
 }
