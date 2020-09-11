@@ -1,17 +1,16 @@
 package com.bianeck.minhasfinancas.service;
 
 import com.bianeck.minhasfinancas.exception.RegraNegocioException;
-import com.bianeck.minhasfinancas.model.entity.Usuario;
 import com.bianeck.minhasfinancas.model.repository.UsuarioRepository;
 import com.bianeck.minhasfinancas.service.impl.UsuarioServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -23,12 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ActiveProfiles("test")
 public class UsuarioServiceTest {
 
-    private static UsuarioRepository repository;
-    private static UsuarioService service;
+    @MockBean
+    UsuarioRepository repository;
+    UsuarioService service;
 
-    @BeforeAll
-    public static void setUp(){
-        repository = Mockito.mock(UsuarioRepository.class);
+    @BeforeEach
+    public void setUp(){
         service = new UsuarioServiceImpl(repository);
     }
 
