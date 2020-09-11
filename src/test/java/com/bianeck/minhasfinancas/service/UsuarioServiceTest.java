@@ -3,9 +3,12 @@ package com.bianeck.minhasfinancas.service;
 import com.bianeck.minhasfinancas.exception.RegraNegocioException;
 import com.bianeck.minhasfinancas.model.entity.Usuario;
 import com.bianeck.minhasfinancas.model.repository.UsuarioRepository;
+import com.bianeck.minhasfinancas.service.impl.UsuarioServiceImpl;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,19 +23,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ActiveProfiles("test")
 public class UsuarioServiceTest {
 
-    @Autowired
-    UsuarioService service;
+    private static UsuarioRepository repository;
+    private static UsuarioService service;
 
-    @Autowired
-    UsuarioRepository repository;
+    @BeforeAll
+    public static void setUp(){
+        repository = Mockito.mock(UsuarioRepository.class);
+        service = new UsuarioServiceImpl(repository);
+    }
 
     @Test
     @DisplayName("Deve validar e-mail")
     public void deveValidarEmail() {
         // cenario
-        UsuarioRepository usuarioRepositoryMock = Mockito.mock(UsuarioRepository.class);
-
-        repository.deleteAll();
+        Mockito.when(repository.existsByEmail(Mockito.anyString())).thenReturn(false);
         // acao - execucao
         assertDoesNotThrow(() -> {
             service.validarEmail("email@email.com");
@@ -43,8 +47,7 @@ public class UsuarioServiceTest {
     @DisplayName("Deve lançar erro ao validar e-mail quando já exisitir e-mail cadastrado")
     public void deveLancarErroAoValidarEmailQuandoExistirEmailCadastrados() {
         // cenario
-        Usuario usuario = Usuario.builder().nome("usuario").email("email@email.com").build();
-        repository.save(usuario);
+        Mockito.when(repository.existsByEmail(Mockito.anyString())).thenReturn(true);
         // acao - execucao
         assertThrows(RegraNegocioException.class,() -> {
             service.validarEmail("email@email.com");
