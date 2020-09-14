@@ -61,8 +61,13 @@ public class UsuarioServiceTest {
         Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
 
         // ação
-        assertThrows(ErroAutenticacao.class, () ->
-                service.autenticar("email@email.com", "senha"));
+        Throwable exception =
+                Assertions.catchThrowable(() ->
+                        service.autenticar("email@email.com", "senha"));
+
+        Assertions.assertThat(exception)
+                .isInstanceOf(ErroAutenticacao.class)
+                .hasMessage("Usuário não encontrado para o e-mail informado.");
 
     }
 
@@ -75,8 +80,14 @@ public class UsuarioServiceTest {
         Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
 
         // ação
-        assertThrows(ErroAutenticacao.class, () ->
-                service.autenticar("email@email.com", "123"));
+        Throwable exception =
+                Assertions.catchThrowable(() ->
+                        service.autenticar("email@email.com", "123"));
+
+        Assertions.assertThat(exception)
+                .isInstanceOf(ErroAutenticacao.class)
+                .hasMessage("Senha inválida.");
+
 
     }
 
@@ -87,9 +98,8 @@ public class UsuarioServiceTest {
         // cenario
         Mockito.when(repository.existsByEmail(Mockito.anyString())).thenReturn(false);
         // acao - execucao
-        assertDoesNotThrow(() -> {
-            service.validarEmail("email@email.com");
-        });
+        assertDoesNotThrow(() ->
+                service.validarEmail("email@email.com"));
     }
 
     @Test
@@ -98,9 +108,8 @@ public class UsuarioServiceTest {
         // cenario
         Mockito.when(repository.existsByEmail(Mockito.anyString())).thenReturn(true);
         // acao - execucao
-        assertThrows(RegraNegocioException.class,() -> {
-            service.validarEmail("email@email.com");
-        });
+        assertThrows(RegraNegocioException.class,() ->
+                service.validarEmail("email@email.com"));
 
         // validacao
     }
