@@ -1,5 +1,6 @@
 package com.bianeck.minhasfinancas.service;
 
+import com.bianeck.minhasfinancas.exception.ErroAutenticacao;
 import com.bianeck.minhasfinancas.exception.RegraNegocioException;
 import com.bianeck.minhasfinancas.model.entity.Usuario;
 import com.bianeck.minhasfinancas.model.repository.UsuarioRepository;
@@ -47,9 +48,38 @@ public class UsuarioServiceTest {
 
         // ação
 
-        Usuario result = service.autenticar(email, senha);
+        Usuario result = assertDoesNotThrow(() -> service.autenticar(email, senha));
+
         Assertions.assertThat(result).isNotNull();
     }
+
+
+    @Test
+    @DisplayName("Deve lançar erro quando não encontrar usuário cadastrado com o e-mail informado")
+    public void deveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado() {
+        // cenário
+        Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
+
+        // ação
+        assertThrows(ErroAutenticacao.class, () ->
+                service.autenticar("email@email.com", "senha"));
+
+    }
+
+    @Test
+    @DisplayName("Deve lançar erro quando a senha não bater")
+    public void deveLancarErroQuandoSenhaNaoBater() {
+        // cenário
+        String senha = "senha";
+        Usuario usuario = Usuario.builder().email("email@email.com").senha(senha).build();
+        Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
+
+        // ação
+        assertThrows(ErroAutenticacao.class, () ->
+                service.autenticar("email@email.com", "123"));
+
+    }
+
 
     @Test
     @DisplayName("Deve validar e-mail")
