@@ -1,8 +1,10 @@
 package com.bianeck.minhasfinancas.service;
 
 import com.bianeck.minhasfinancas.exception.RegraNegocioException;
+import com.bianeck.minhasfinancas.model.entity.Usuario;
 import com.bianeck.minhasfinancas.model.repository.UsuarioRepository;
 import com.bianeck.minhasfinancas.service.impl.UsuarioServiceImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +33,22 @@ public class UsuarioServiceTest {
     @BeforeEach
     public void setUp(){
         service = new UsuarioServiceImpl(repository);
+    }
+
+    @Test
+    @DisplayName("Deve autenticar um usuário com sucesso")
+    public void deveAUtenticarUmUsuarioComSucesso() {
+        // cenário
+        String email = "email@email.com";
+        String senha = "senha";
+
+        Usuario usuario = Usuario.builder().email(email).senha(senha).id(1L).build();
+        Mockito.when(repository.findByEmail(email)).thenReturn(Optional.of(usuario));
+
+        // ação
+
+        Usuario result = service.autenticar(email, senha);
+        Assertions.assertThat(result).isNotNull();
     }
 
     @Test
